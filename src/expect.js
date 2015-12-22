@@ -4,7 +4,24 @@ var esprima = require('esprima');
 var walk = require('esprima-walk');
 var _ = require('underscore');
 
-function Q(query) {
+function walkAST(ast,callback,maxDepth=false,depth=0) {
+	if(maxDepth !== false && depth > maxDepth) {
+		return;
+	} else {
+		callback(ast);
+		Object.keys(ast).map(k => ast[k]).forEach(function(c) {
+			if(c instanceof Array) {
+				c.filter(x => x).forEach(
+					e => walkAST(e,callback,maxDepth,depth + 1)
+				)
+			} else if(c != void 0 && typeof c.type === 'string') {
+				walkAST(c,callback,maxDepth,depth + 1);
+			}
+		});
+	}
+}
+
+function Q(query,maxDepth=false) {
 	for(let type in query) {
 		let exp = query[type];
 		if(!exp.message) exp.message = `Assertion for type ${type} failed.`;
@@ -12,14 +29,14 @@ function Q(query) {
 	return function(element) {
 		var matches = {},
 			conditions = Pass;
-		walk(element,function(node) {
+		walkAST(element,function(node) {
 			if(node != element) {
 				if(query[node.type]) {
 					matches[node.type] = matches[node.type] || [];
 					matches[node.type].push(node);
 				}
 			}
-		});
+		},maxDepth);
 		return _.flatten(Object.keys(query).map(type => query[type].evaluate(matches[type] || [])));
 	};
 }
@@ -55,7 +72,7 @@ class Expect {
 	}
 
 	exists() {
-		this.forSome(() => true);
+		this.has(x => x.length);
 		return this;
 	}
 
@@ -90,7 +107,8 @@ class Expect {
 				if(!Pass.is(t(el))) return Fail.because(this.message);
 			}
 			for(let i=0;i<this.forSomeTests.length;i++) {
-				forSomeRes[i] = forSomeRes[i] || Pass.is(this.forSomeTests[i](el));
+				let res = this.forSomeTests[i](el);
+				forSomeRes[i] = forSomeRes[i] || Pass.is(res);
 			}
 		}
 		return [true].concat(forSomeRes).reduce((a,b) => a && b) ? Pass : Fail.because(this.message);
@@ -134,7 +152,6 @@ function Or(a,b,...rest) {
 		evaluate(set) {
 			var aEval = a.evaluate(set);
 			var bEval = b.evaluate(set);
-			console.log('OR',aEval,bEval,Pass.is(aEval),Pass.is(bEval));
 			if(Pass.is(aEval) || Pass.is(bEval)) {
 				return Pass;
 			} else {
@@ -148,15 +165,17 @@ function Not(a) {
 	return {
 		evaluate(set) {
 			var aEval = a.evaluate(set);
-			if(aEval == Pass) {
+			if(Pass.is(aEval)) {
 				return Fail.because(`NOT ${a.message}`);
+			} else {
+				return Pass;
 			}
 		}
 	}
 }
 
 var Require = Expect.that().exists();
-var Forbid = Expect.that().has(s => s.length == 0);
+var Forbid = Expect.that().doesNotExist();
 
 module.exports = {
 	Q: Q,
@@ -167,5 +186,6 @@ module.exports = {
 	Forbid: Forbid,
 	And: And,
 	Or: Or,
-	Not: Not
+	Not: Not,
+	walkAST: walkAST
 };

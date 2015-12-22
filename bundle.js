@@ -16599,7 +16599,33 @@ var esprima = require('esprima');
 var walk = require('esprima-walk');
 var _ = require('underscore');
 
+function walkAST(ast, callback) {
+	var maxDepth = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+	var depth = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+	if (maxDepth !== false && depth > maxDepth) {
+		return;
+	} else {
+		callback(ast);
+		Object.keys(ast).map(function (k) {
+			return ast[k];
+		}).forEach(function (c) {
+			if (c instanceof Array) {
+				c.filter(function (x) {
+					return x;
+				}).forEach(function (e) {
+					return walkAST(e, callback, maxDepth, depth + 1);
+				});
+			} else if (c != void 0 && typeof c.type === 'string') {
+				walkAST(c, callback, maxDepth, depth + 1);
+			}
+		});
+	}
+}
+
 function Q(query) {
+	var maxDepth = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
 	for (var type in query) {
 		var exp = query[type];
 		if (!exp.message) exp.message = 'Assertion for type ' + type + ' failed.';
@@ -16607,14 +16633,14 @@ function Q(query) {
 	return function (element) {
 		var matches = {},
 		    conditions = Pass;
-		walk(element, function (node) {
+		walkAST(element, function (node) {
 			if (node != element) {
 				if (query[node.type]) {
 					matches[node.type] = matches[node.type] || [];
 					matches[node.type].push(node);
 				}
 			}
-		});
+		}, maxDepth);
 		return _.flatten(Object.keys(query).map(function (type) {
 			return query[type].evaluate(matches[type] || []);
 		}));
@@ -16674,8 +16700,8 @@ var Expect = (function () {
 	_createClass(Expect, [{
 		key: 'exists',
 		value: function exists() {
-			this.forSome(function () {
-				return true;
+			this.has(function (x) {
+				return x.length;
 			});
 			return this;
 		}
@@ -16770,7 +16796,8 @@ var Expect = (function () {
 					}
 
 					for (var i = 0; i < this.forSomeTests.length; i++) {
-						forSomeRes[i] = forSomeRes[i] || Pass.is(this.forSomeTests[i](el));
+						var res = this.forSomeTests[i](el);
+						forSomeRes[i] = forSomeRes[i] || Pass.is(res);
 					}
 				}
 			} catch (err) {
@@ -16843,7 +16870,6 @@ function Or(a, b) {
 		evaluate: function evaluate(set) {
 			var aEval = a.evaluate(set);
 			var bEval = b.evaluate(set);
-			console.log('OR', aEval, bEval, Pass.is(aEval), Pass.is(bEval));
 			if (Pass.is(aEval) || Pass.is(bEval)) {
 				return Pass;
 			} else {
@@ -16857,17 +16883,17 @@ function Not(a) {
 	return {
 		evaluate: function evaluate(set) {
 			var aEval = a.evaluate(set);
-			if (aEval == Pass) {
+			if (Pass.is(aEval)) {
 				return Fail.because('NOT ' + a.message);
+			} else {
+				return Pass;
 			}
 		}
 	};
 }
 
 var Require = Expect.that().exists();
-var Forbid = Expect.that().has(function (s) {
-	return s.length == 0;
-});
+var Forbid = Expect.that().doesNotExist();
 
 module.exports = {
 	Q: Q,
@@ -16878,7 +16904,8 @@ module.exports = {
 	Forbid: Forbid,
 	And: And,
 	Or: Or,
-	Not: Not
+	Not: Not,
+	walkAST: walkAST
 };
 
 },{"esprima":"/Users/Ian/github/ka-test-tool/node_modules/esprima/esprima.js","esprima-walk":"/Users/Ian/github/ka-test-tool/node_modules/esprima-walk/esprima-walk.js","underscore":"/Users/Ian/github/ka-test-tool/node_modules/underscore/underscore.js"}],"/Users/Ian/github/ka-test-tool/src/main.js":[function(require,module,exports){
@@ -16917,13 +16944,14 @@ $(function () {
 });
 
 var test = Q({
-	ForStatement: And(Expect.that("[for] loops may not be nested").forAll(Q({ ForStatement: Forbid })), Expect.that("There should be an [if] statement inside of a [for] loop").exists().forSome(Q({ IfStatement: Require }))),
-	VariableDeclaration: And(Expect.that("The program should contain exactly two [var] declarations").has(function (s) {
-		return s.length == 2;
+	ForStatement: And(Expect.that("There shouldn't be any nested [for] loops").forAll(Q({ ForStatement: Forbid })), Expect.that("There should be an [if] statement inside of a [for] loop").exists().forSome(Q({ IfStatement: Require }))),
+	VariableDeclaration: And(Expect.that("The program should contain at least two [var] declarations").has(function (s) {
+		return s.length >= 2;
 	}), Expect.that("All variables should begin with the letter b.").forAll(function (x) {
 		return x.declarations[0] && x.declarations[0].id.name.charAt(0).toLowerCase() == 'b';
 	})),
-	WhileStatement: Expect.that("There should be no [while] loops").doesNotExist()
+	WhileStatement: Expect.that("There should be no [while] loops").doesNotExist(),
+	WithStatement: Expect.that("[with] statements are literally the devil").doesNotExist()
 });
 
 function onTextUpdate(e) {
@@ -16971,8 +16999,6 @@ function onTextUpdate(e) {
 		$('#notices').addClass('okay');
 	}
 }
-
-'foo';
 
 },{"../src/expect.js":"/Users/Ian/github/ka-test-tool/src/expect.js","esprima":"/Users/Ian/github/ka-test-tool/node_modules/esprima/esprima.js","fs":"/usr/local/lib/node_modules/watchify/node_modules/browserify/lib/_empty.js","jquery":"/Users/Ian/github/ka-test-tool/node_modules/jquery/dist/jquery.js","underscore":"/Users/Ian/github/ka-test-tool/node_modules/underscore/underscore.js"}],"/usr/local/lib/node_modules/watchify/node_modules/browserify/lib/_empty.js":[function(require,module,exports){
 

@@ -1,0 +1,46 @@
+- walkAST
+	- test all trees against reference implementation
+
+- Pass.is
+	- array
+		- pass array
+		- fail array
+	- boolean
+	- pass
+	- fail
+
+- Expectations
+	- exists
+		- is var
+	- doesNotExist
+		- no while
+	- forAll
+		- variable names
+		- all for has if
+	- forSome
+		- variable names
+		- some for has if
+	- has
+		- more than half
+	- forAll forSome has
+		- all b, for in if, two var, no while
+	- nested Qs
+		- no for in for
+	- Q max depth
+		- no directly nested for
+
+- Booleans
+	- And
+		- two vars, var names
+		- !two vars, var names
+		- two vars, !var names
+		- !two vars, !var names
+	- Or
+		- two vars, var names
+		- !two vars, var names
+		- two vars, !var names
+		- !two vars, !var names
+	- Not
+		- ! b vars
+
+
