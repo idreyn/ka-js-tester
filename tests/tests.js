@@ -6,8 +6,6 @@ var {Q, Pass, Fail, Expect, Require, Forbid, And, Or, Not} = require('../src/exp
 
 var trees = ['for-loops'].map(x => esprima.parse(fs.readFileSync(`scripts/${x}.js`).toString()));
 
-console.log(trees[0])
-
 var tests = {
 	noNestedFor: Q({
 		ForStatement: Expect.that("For loops may not be nested").forAll(Q({
@@ -19,6 +17,4 @@ var tests = {
 	})
 };
 
-console.log(tests.exactlyTwoVarDeclarations(trees[0]));
-
-
+console.log(Pass.bool(tests.exactlyTwoVarDeclarations(trees[0])));

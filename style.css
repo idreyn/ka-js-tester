@@ -1,0 +1,142 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: 'Arial', sans-serif;
+}
+
+main {
+	width: 100%;
+	height: 100%;
+}
+
+main > .CodeMirror {
+	height: 100%;
+}
+
+.code-text {
+	font-family: monospace;
+	color: #FFF;
+	background: #555;
+	padding: 3px;
+	border-radius: 5px;
+}
+
+#notices {
+	position: absolute;
+	bottom: 20px;
+	right: 20px;
+	background: #FFF;
+	border-radius: 5px;
+	overflow: hidden;
+	z-index: 2;
+	transition: background 0.2s;
+}
+
+#notices.okay {
+	background: #7CB342;
+}
+
+#notices.warning {
+	background: #F57F17;
+}
+
+#notices.error {
+	background: #E53935;
+}
+
+#notices .warning-item {
+	margin-bottom: 4px;
+}
+
+#notices > #contents {
+	padding: 10px;
+	background: #FFF;
+}
+
+#notices.closed > #contents {
+	display: none;
+}
+
+#notices #contents > * {
+	display: none;
+}
+
+#notices.okay #contents > #okay {
+	display: block;
+}
+
+#notices.warning #contents > #warning {
+	display: block;
+}
+
+#notices.error #contents > #error {
+	display: block;
+}
+
+#notices > #top-bar {
+	padding: 5px;
+	color: #FFF;
+}
+
+#notices #toggle-button {
+	float: right;
+	display: inline-block;
+	cursor: pointer;
+}
+
+#notices.closed #toggle-button {
+	padding-bottom: 3px;
+}
+
+#notices #toggle-button > *  {
+	display: none;
+}
+
+#notices.closed #toggle-button {
+	text-align: center;
+	width: 16px;
+	height: 20px;
+}
+
+#notices:not(.closed) #toggle-button > .open {
+	display: inline-block;
+}
+
+#notices.closed.okay #toggle-button > .okay {
+	display: inline-block;
+}
+
+#notices.closed.warning #toggle-button > .warning {
+	display: inline-block;
+}
+
+#notices.closed.error #toggle-button > .error {
+	display: inline-block;
+}
+
+#notices #toggle-button {
+	float: right;
+	display: inline-block;
+	cursor: pointer;
+}
+
+#notices.closed #top-bar-text {
+	display: none;
+}
+
+#notices #top-bar-text > * {
+	display: none;
+}
+
+#notices.okay #top-bar-text > .okay {
+	display: inline-block;
+}
+
+#notices.warning #top-bar-text > .warning {
+	display: inline-block;
+}
+
+#notices.error #top-bar-text > .error {
+	display: inline-block;
+}

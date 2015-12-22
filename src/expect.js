@@ -2,6 +2,7 @@
 
 var esprima = require('esprima');
 var walk = require('esprima-walk');
+var _ = require('underscore');
 
 function Q(query) {
 	for(let type in query) {
@@ -19,19 +20,15 @@ function Q(query) {
 				}
 			}
 		});
-		for(let type in query) {
-			let result = query[type].evaluate(matches[type] || []);
-			if(result != Pass) {
-				return result;
-			}
-		}
-		return Pass;
+		return _.flatten(Object.keys(query).map(type => query[type].evaluate(matches[type] || [])));
 	};
 }
 
 class Pass {
-	static bool(x) {
-		if(typeof x == 'boolean') {
+	static is(x) {
+		if(x instanceof Array) {
+			return x.filter(i => i != Pass).length == 0;
+		} else if(typeof x == 'boolean') {
 			return x;
 		} else {
 			return x == Pass;
@@ -62,6 +59,11 @@ class Expect {
 		return this;
 	}
 
+	doesNotExist() {
+		this.has(x => !x.length);
+		return this;
+	}
+
 	forAll(x) {
 		this.forAllTests.push(x);
 		return this;
@@ -85,10 +87,10 @@ class Expect {
 		}
 		for(let el of set) {
 			for(let t of this.forAllTests) {
-				if(!Pass.bool(t(el))) return Fail.because(this.message);
+				if(!Pass.is(t(el))) return Fail.because(this.message);
 			}
 			for(let i=0;i<this.forSomeTests.length;i++) {
-				forSomeRes[i] = forSomeRes[i] || Pass.bool(this.forSomeTests[i](el));
+				forSomeRes[i] = forSomeRes[i] || Pass.is(this.forSomeTests[i](el));
 			}
 		}
 		return [true].concat(forSomeRes).reduce((a,b) => a && b) ? Pass : Fail.because(this.message);
@@ -99,34 +101,45 @@ class Expect {
 	}
 }
 
-function And(a,b) {
+function And(a,b,...rest) {
+	if(rest.length) {
+		return And(a,And(b,...rest));
+	}
 	return {
 		evaluate(set) {
-			var aEval = a.evaluate(set);
-			if(aEval != Pass) {
-				return aEval;
+			var aEval = a.evaluate(set),
+				bEval = b.evaluate(set),
+				passA = Pass.is(aEval),
+				passB = Pass.is(bEval);
+			if(passA && passB) {
+				return Pass;
+			} else {
+				if(passA) {
+					return bEval;
+				} else if(passB) {
+					return aEval;
+				} else {
+					return [aEval,bEval];
+				}
 			}
-			var bEval = b.evaluate(set);
-			if(bEval != Pass) {
-				return bEval;
-			}
-			return Pass;
 		}
 	}
 }
 
-function Or(a,b) {
+function Or(a,b,...rest) {
+	if(rest.length) {
+		return Or(a,Or(b,...rest));
+	}
 	return {
 		evaluate(set) {
 			var aEval = a.evaluate(set);
-			if(aEval == Pass) {
-				return Pass;
-			}
 			var bEval = b.evaluate(set);
-			if(bEval == Pass) {
+			console.log('OR',aEval,bEval,Pass.is(aEval),Pass.is(bEval));
+			if(Pass.is(aEval) || Pass.is(bEval)) {
 				return Pass;
+			} else {
+				return Fail.because(aEval.message + ' OR ' + bEval.message);
 			}
-			return bEval;
 		}
 	}
 }

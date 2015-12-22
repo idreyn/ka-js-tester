@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ka-js-tester</title>
+		<link rel='stylesheet' type='text/css' href='style.css' />
+		<link rel='stylesheet' type='text/css' href='node_modules/codemirror/lib/codemirror.css' />
+		<link rel='stylesheet' type='text/css' href='node_modules/codemirror/theme/ambiance.css' />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<script src='node_modules/codemirror/lib/codemirror.js'></script>
+		<script src='node_modules/codemirror/mode/javascript/javascript.js'></script>
+		<script src='bundle.js'></script>
+	</head>
+	<body>
+		<main>
+			<textarea></textarea>
+		</main>
+		<div id='notices' class='warning'>
+			<div id='top-bar'>
+				<span id='top-bar-text'>
+					<span class='okay'>Lookin' good!</span>
+					<span class='warning'>Hey! Listen!</span>
+					<span class='error'>Syntax error</span>
+				</span>
+				<div id='toggle-button'>
+					<span class='open fa fa-minus-square'></span>
+					<span class='okay fa fa-check-circle'></span>
+					<span class='warning fa fa-exclamation-triangle'></span>
+					<span class='error fa fa-times-circle'></span>
+				</div>
+			</div>
+			<div id='contents'>
+				<div id='error'>
+					<span class='fa fa-times-circle'></span>
+					<span class='text'></span>
+				</div>
+				<div id='warning'></div>
+				<div id='okay'>No problems detected with your code!</div>
+			</div>
+		</div>
+	</body>
+</html>
