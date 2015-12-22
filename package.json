@@ -13,7 +13,6 @@
     "es5-shim": "^4.4.1",
     "esprima": "^2.7.1",
     "esprima-walk": "^0.1.0",
-    "font-awesome": "^4.5.0",
     "jquery": "^1.11.3",
     "underscore": "^1.8.3"
   },
@@ -37,6 +36,8 @@
     "babel-plugin-transform-es2015-template-literals": "^6.3.13",
     "babel-plugin-transform-es2015-typeof-symbol": "^6.3.13",
     "babel-plugin-transform-es2015-unicode-regex": "^6.3.13",
+    "babel-plugin-transform-es3-member-expression-literals": "^6.3.13",
+    "babel-plugin-transform-es3-property-literals": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.18",
     "babelify": "^7.2.0",
     "browserify-css": "^0.8.3"
