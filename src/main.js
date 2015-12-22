@@ -1,18 +1,23 @@
 'use strict';
 
+require('browserify-css');
+require('../main.css');
+
+require("babel-polyfill");
+require("es5-shim");
+
 var _ = require('underscore');
 var $ = require('jquery');
-var fs = require('fs');
 var esprima = require('esprima');
 var {Q, Pass, Fail, Expect, Require, Forbid, And, Or, Not} = require('../src/expect.js');
 
-var editor;
+var CodeMirror = require('codemirror');
+require('codemirror/mode/javascript/javascript.js');
 
 $(() => {
-	editor = CodeMirror.fromTextArea(document.querySelector('main > textarea'),{
+	var editor = CodeMirror.fromTextArea($('textarea').get(0),{
 		lineNumbers: true,
 		theme: 'ambiance',
-		mode: 'javascript',
 	});
 	editor.on('change',_.throttle(onTextUpdate,1000));
 	onTextUpdate();

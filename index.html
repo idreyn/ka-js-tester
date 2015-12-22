@@ -2,18 +2,14 @@
 <html>
 	<head>
 		<title>ka-js-tester</title>
-		<link rel='stylesheet' type='text/css' href='style.css' />
-		<link rel='stylesheet' type='text/css' href='node_modules/codemirror/lib/codemirror.css' />
-		<link rel='stylesheet' type='text/css' href='node_modules/codemirror/theme/ambiance.css' />
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-		<script src='node_modules/codemirror/lib/codemirror.js'></script>
-		<script src='node_modules/codemirror/mode/javascript/javascript.js'></script>
 		<script src='bundle.js'></script>
+		<!-- FontAwesome not included as an NPM dependency because I don't want to set up Gulp -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 	</head>
 	<body>
-		<main>
+		<div id='main'>
 			<textarea></textarea>
-		</main>
+		</div>
 		<div id='notices' class='warning'>
 			<div id='top-bar'>
 				<span id='top-bar-text'>

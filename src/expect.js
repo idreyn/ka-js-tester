@@ -1,7 +1,5 @@
 'use strict';
 
-var esprima = require('esprima');
-var walk = require('esprima-walk');
 var _ = require('underscore');
 
 function walkAST(ast,callback,maxDepth=false,depth=0) {
