@@ -1,13 +1,15 @@
 'use strict';
 
-var exp = require('./expect.js');
+var $ = require('jquery');
+var fs = require('fs');
 var esprima = require('esprima');
+var {Q, Pass, Fail, Expect, Require, Forbid, And, Or, Not} = require('../src/expect.js');
 
-var {Q,Expect} = exp;
-
-var test = esprima.parse('var foo = 5;');
-console.log(test);
-var query = Q({
-	VariableDeclaration: Expect.that().exists().has(s => s.length > 1)
+$(() => {
+	console.log(document.querySelector('#main'));
+	CodeMirror.fromTextArea(document.querySelector('main > textarea'),{
+		lineNumbers: true,
+		theme: 'ambiance',
+		mode: 'javascript'
+	});
 });
-console.log(query(test));
